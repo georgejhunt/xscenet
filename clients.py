@@ -42,6 +42,7 @@ cgitb.enable()
 import pprint
 import csv
 import datetime
+import time
 import logging
 import sys
 import subprocess
@@ -73,7 +74,7 @@ class OpenVPNStatusParser:
 
             elif row_title == "CLIENT_LIST":
                 try:
-                    self.connected_clients[row[2]] = { "keyname":row[1],"VirtAddr":row[3],"recd":row[4],"sent":row[5],"startts":row[7] }
+                    self.connected_clients[row[2]] = { "keyname":row[1],"VirtAddr":row[3],"recd":row[4],"sent":row[5],"startts":row[8] }
                 except IndexError:
                     logging.error("CLIENT_LIST row is invalid: %s" % row)
 
@@ -91,6 +92,7 @@ class OpenVPNStatusParser:
 
 
 def main():
+    cur_ts = time.time()
     if len(sys.argv) == 1:
         files = ["/etc/openvpn/status.log"]
     else:
@@ -122,8 +124,11 @@ def main():
             x = lookup[y]
             handle = uuid = data = ''
             try:
-                secs = long(parser.connected_clients[x]["stopts"]) - long(parser.connected_clients[x]["startts"])
-            except:
+#                secs = long(parser.connected_clients[x]["stopts"]) - long(parser.connected_clients[x]["startts"])
+                 start = long(parser.connected_clients[x]["startts"])
+                 secs = long(cur_ts) - long(start)
+            except Exception as e:
+                print(str(e))
                 secs = 0
             m, s = divmod(secs, 60)
             h, m = divmod(m , 60)
